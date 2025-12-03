@@ -1,0 +1,105 @@
+import java.sql.*;
+
+public class Main {
+
+    private static final String DB_URL = "jdbc:mysql://localhost/ri_db";
+    private static final String DB_USER = "test";
+    private static final String DB_PASSWORD = "test123";
+
+    public static void main(String[] args) {
+        try {
+            // Connect to the database
+            Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+
+            // Create a statement
+            Statement statement = connection.createStatement();
+
+            // Get user input
+            java.util.Scanner scanner = new java.util.Scanner(System.in);
+            int operation = scanner.nextInt();
+
+            if (operation == 1) {
+                // Insert operation
+                int customerId = scanner.nextInt();
+                scanner.nextLine(); // Consume the newline character
+
+                String name = scanner.nextLine();
+                String contactInfo = scanner.nextLine();
+                String subscriptionPlan = scanner.nextLine();
+                String paymentHistory = scanner.nextLine();
+
+                // Execute the insert query
+                String insertQuery = "INSERT INTO customer (customer_id, name, contact_information, subscription_plan, payment_history) VALUES (?, ?, ?, ?, ?)";
+                PreparedStatement insertStatement = connection.prepareStatement(insertQuery);
+                insertStatement.setInt(1, customerId);
+                insertStatement.setString(2, name);
+                insertStatement.setString(3, contactInfo);
+                insertStatement.setString(4, subscriptionPlan);
+                insertStatement.setString(5, paymentHistory);
+                insertStatement.executeUpdate();
+                System.out.println("Customer record inserted successfully.");
+                displayAllCustomers(statement);
+
+            } else if (operation == 2) {
+                // Update operation
+                int customerId = scanner.nextInt();
+                scanner.nextLine(); // Consume the newline character
+
+                String name = scanner.nextLine();
+                String contactInfo = scanner.nextLine();
+                String subscriptionPlan = scanner.nextLine();
+                String paymentHistory = scanner.nextLine();
+
+                // Execute the update query
+                String updateQuery = "UPDATE customer SET name = ?, contact_information = ?, subscription_plan = ?, payment_history = ? WHERE customer_id = ?";
+                PreparedStatement updateStatement = connection.prepareStatement(updateQuery);
+                updateStatement.setString(1, name);
+                updateStatement.setString(2, contactInfo);
+                updateStatement.setString(3, subscriptionPlan);
+                updateStatement.setString(4, paymentHistory);
+                updateStatement.setInt(5, customerId);
+                int rowsUpdated = updateStatement.executeUpdate();
+                if (rowsUpdated > 0) {
+                    System.out.println("Customer record updated successfully.");
+                    displayAllCustomers(statement);
+                } else {
+                    System.out.println("No customer record found with the given ID.");
+                }
+
+            } else if (operation == 3) {
+                // Display all customers
+                displayAllCustomers(statement);
+
+            }  else {
+                System.out.println("Invalid operation number. Please try again.");
+            }
+
+            // Close the resources
+            statement.close();
+            connection.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+private static void displayAllCustomers(Statement statement) throws SQLException {
+    String selectQuery = "SELECT * FROM customer";
+    ResultSet resultSet = statement.executeQuery(selectQuery);
+
+    // Iterate over the result set and print the customer records
+    while (resultSet.next()) {
+        int customerId = resultSet.getInt("customer_id");
+        String name = resultSet.getString("name");
+        String contactInfo = resultSet.getString("contact_information");
+        String subscriptionPlan = resultSet.getString("subscription_plan");
+        String paymentHistory = resultSet.getString("payment_history");
+
+        System.out.println("ID: " + customerId + ", Name: " + name + ", Contact Information: " + contactInfo + ", Subscription Plan: " + subscriptionPlan + ", Payment History: " + paymentHistory);
+    }
+
+    resultSet.close();
+}
+
+
+}

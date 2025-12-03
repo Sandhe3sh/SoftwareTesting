@@ -1,0 +1,9 @@
+create screeshot under project
+
+
+@Test
+public void tests() throws IOException {
+    File source = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+    File desti = new File("/home/coder/project/workspace/Project/screenshots/filename.png");
+    FileUtils.copyFile(source, desti);
+}

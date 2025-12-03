@@ -1,0 +1,64 @@
+package runner;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.events.EventFiringDecorator;
+import org.openqa.selenium.support.events.WebDriverListener;
+import org.testng.annotations.Test;
+import utils.EventHandler;
+
+public class TestSample {
+
+    public static WebDriver driver;
+
+    @Test
+    public void testMain() {
+        try {
+            driver = new RemoteWebDriver(new URL("http://localhost:4444"), new ChromeOptions());
+
+            driver.manage().window().maximize();
+            driver.manage().timeouts().implicitlyWait(java.time.Duration.ofSeconds(10));
+            driver.manage().timeouts().pageLoadTimeout(java.time.Duration.ofSeconds(10));
+
+            WebDriverListener listener = new EventHandler();
+            driver = new EventFiringDecorator<>(listener).decorate(driver);
+
+            // 1. Open URL
+            driver.get("https://automationstepbystep.com/demo-quiz-1/");
+
+            // 2. Enter name
+            driver.findElement(By.name("watupro_taker_name")).sendKeys("Navanee");
+
+            // 3. Start Quiz
+           driver.findElement(By.className("watupro-start-quiz")).click();
+
+            // 4. Answer Question 1 → Blue
+            driver.findElement(By.id("answer-id-2")).click();
+
+            // 5. Answer Question 2 → Green
+            driver.findElement(By.id("answer-id-4")).click();
+
+            // 6. Click View Results
+            driver.findElement(By.id("action-button")).click();
+
+            // 7. Search "Devops"
+            driver.findElement(By.name("s")).sendKeys("Devops");
+            driver.findElement(By.name("s")).submit();
+
+            // 8. Click Search button
+            driver.findElement(By.partialLinkText("DevOps Career RoadMap")).click();
+
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } finally {
+            if (driver != null) {
+                driver.quit();
+            }
+        }
+    }
+}

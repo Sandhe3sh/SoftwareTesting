@@ -1,0 +1,100 @@
+// only one testcase pass
+
+package runner;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.Duration;
+import java.util.Set;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.events.EventFiringDecorator;
+import org.openqa.selenium.support.events.WebDriverListener;
+import org.testng.annotations.Test;
+import utils.EventHandler;
+
+public class TestSample {
+
+    public static WebDriver driver;
+
+    @Test
+    public void testMain() {
+        try {
+            driver = new RemoteWebDriver(new URL("http://localhost:4444"), new ChromeOptions());
+            driver.manage().window().maximize();
+            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+            driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(10));
+            
+            WebDriverListener listener = new EventHandler();
+            driver = new EventFiringDecorator<>(listener).decorate(driver);
+
+            driver.get("https://www.angi.com/");
+            String homeWindow = driver.getWindowHandle();
+
+            // Twitter
+            scrollToFooter();
+            clickSocialIcon("twitter");
+            switchToNewWindowAndClose(homeWindow);
+
+            // Facebook
+            scrollToFooter();
+            clickSocialIcon("facebook");
+            switchToNewWindowAndClose(homeWindow);
+
+            // Pinterest
+            scrollToFooter();
+            clickSocialIcon("pinterest");
+            switchToNewWindowAndClose(homeWindow);
+
+            Thread.sleep(5000);
+        
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (driver != null) {
+                driver.quit();
+            }
+        }
+    }
+
+    private void scrollToFooter() {
+        ((JavascriptExecutor) driver).executeScript("window.scrollTo(0, document.body.scrollHeight);");
+        try { Thread.sleep(2000); } catch (InterruptedException e) {}
+    }
+
+    private void clickSocialIcon(String platform) {
+        WebElement icon;
+        switch (platform) {
+            case "twitter":
+                icon = driver.findElement(By.xpath("//a[contains(@aria-label,'Twitter') or contains(@title,'Twitter') or contains(@class,'twitter') or contains(@href,'twitter') or contains(@href,'x.com')]"));
+                break;
+            case "facebook":
+                icon = driver.findElement(By.xpath("//a[contains(@aria-label,'Facebook') or contains(@title,'Facebook') or contains(@class,'facebook') or contains(@href,'facebook')]"));
+                break;
+            case "pinterest":
+                icon = driver.findElement(By.xpath("//a[contains(@aria-label,'Pinterest') or contains(@title,'Pinterest') or contains(@class,'pinterest') or contains(@href,'pinterest')]"));
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown platform: " + platform);
+        }
+        icon.click();
+    }
+
+    private void switchToNewWindowAndClose(String homeWindow) {
+        Set<String> windows = driver.getWindowHandles();
+        for (String window : windows) {
+            if (!window.equals(homeWindow)) {
+                driver.switchTo().window(window);
+                driver.close();
+                break;
+            }
+        }
+        driver.switchTo().window(homeWindow);
+    }
+}
+
+

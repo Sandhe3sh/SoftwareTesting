@@ -1,0 +1,200 @@
+package runner;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.Duration;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.events.EventFiringDecorator;
+import org.openqa.selenium.support.events.WebDriverListener;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import utils.EventHandler;
+
+public class TestRunner {
+
+    public static WebDriver driver;
+    static int pageLoadTime = 20;
+
+    @BeforeMethod
+    public WebDriver beforeMethod() throws MalformedURLException {
+        ChromeOptions chromeOptions = new ChromeOptions();
+        driver = new RemoteWebDriver(new URL("http://localhost:4444/"), chromeOptions);
+
+        driver.get("https://groww.in/calculators/home-loan-emi-calculator");
+        driver.manage().window().maximize();
+        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(pageLoadTime));
+
+        WebDriverListener listener = new EventHandler();
+        driver = new EventFiringDecorator<>(listener).decorate(driver);
+
+        return driver;
+    }
+
+    @Test
+    public void testClickCalculators() {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        WebElement calculatorsLink = wait.until(
+                ExpectedConditions.elementToBeClickable(By.linkText("Calculators"))
+        );
+        calculatorsLink.click();
+    }
+
+    @Test
+    public void testClickHomeLoanEMI() {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        WebElement homeLoanEMILink = wait.until(
+                ExpectedConditions.elementToBeClickable(By.linkText("Home Loan EMI"))
+        );
+        homeLoanEMILink.click();
+    }
+
+    @Test
+    public void testEnterLoanAmount() {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.xpath("//h1[contains(text(),'EMI') or contains(text(),'emi')]")
+        ));
+
+        WebElement field = null;
+        String[] locators = {
+                "//input[@id='LOAN_AMOUNT']",
+                "//input[@name='LOAN_AMOUNT']",
+                "//input[contains(@id,'LOAN_AMOUNT')]",
+                "//input[@placeholder='Enter loan amount' or contains(@placeholder,'Loan')]",
+                "//input[@type='number' and contains(@class,'loan')]",
+                "(//input[@type='number'])[1]",
+                "//div[contains(text(),'Loan Amount') or contains(text(),'LOAN AMOUNT')]//following::input[1]"
+        };
+
+        for (String locator : locators) {
+            try {
+                field = driver.findElement(By.xpath(locator));
+                if (field.isDisplayed()) {
+                    break;
+                }
+            } catch (Exception e) {
+                // try next
+            }
+        }
+
+        if (field != null) {
+            field.clear();
+            field.sendKeys("5000000");
+
+            String enteredValue = field.getAttribute("value");
+            if (!enteredValue.contains("5000000")) {
+                ((JavascriptExecutor) driver).executeScript(
+                        "arguments[0].value='5000000';", field
+                );
+            }
+        } else {
+            throw new RuntimeException("Loan Amount field not found");
+        }
+    }
+
+    @Test
+    public void testEnterROI() {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.xpath("//h1[contains(text(),'EMI') or contains(text(),'emi')]")
+        ));
+
+        WebElement field = null;
+        String[] locators = {
+                "//input[@id='RATE_OF_INTEREST']",
+                "//input[@name='RATE_OF_INTEREST']",
+                "//input[contains(@id,'INTEREST') or contains(@id,'RATE')]",
+                "//input[@placeholder='Enter rate of interest' or contains(@placeholder,'interest') or contains(@placeholder,'Rate')]",
+                "(//input[@type='number'])[2]",
+                "//div[contains(text(),'Rate of Interest') or contains(text(),'ROI')]//following::input[1]"
+        };
+
+        for (String locator : locators) {
+            try {
+                field = driver.findElement(By.xpath(locator));
+                if (field.isDisplayed()) {
+                    break;
+                }
+            } catch (Exception e) {
+                // try next
+            }
+        }
+
+        if (field != null) {
+            field.clear();
+            field.sendKeys("8.5");
+
+            String enteredValue = field.getAttribute("value");
+            if (!enteredValue.contains("8.5")) {
+                ((JavascriptExecutor) driver).executeScript(
+                        "arguments[0].value='8.5';", field
+                );
+            }
+        } else {
+            throw new RuntimeException("ROI field not found");
+        }
+    }
+
+    @Test
+    public void testEnterLoanTenure() {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.xpath("//h1[contains(text(),'EMI') or contains(text(),'emi')]")
+        ));
+
+        WebElement field = null;
+        String[] locators = {
+                "//input[@id='LOAN_TENURE']",
+                "//input[@name='LOAN_TENURE']",
+                "//input[contains(@id,'TENURE') or contains(@id,'PERIOD')]",
+                "//input[@placeholder='Enter loan tenure' or contains(@placeholder,'tenure') or contains(@placeholder,'Period')]",
+                "(//input[@type='number'])[3]",
+                "//div[contains(text(),'Loan Tenure') or contains(text(),'TENURE')]//following::input[1]"
+        };
+
+        for (String locator : locators) {
+            try {
+                field = driver.findElement(By.xpath(locator));
+                if (field.isDisplayed()) {
+                    break;
+                }
+            } catch (Exception e) {
+                // try next
+            }
+        }
+
+        if (field != null) {
+            field.clear();
+            field.sendKeys("20");
+
+            String enteredValue = field.getAttribute("value");
+            if (!enteredValue.contains("20")) {
+                ((JavascriptExecutor) driver).executeScript(
+                        "arguments[0].value='20';", field
+                );
+            }
+        } else {
+            throw new RuntimeException("Loan Tenure field not found");
+        }
+    }
+
+    @AfterMethod
+    public void cleanup() {
+        if (driver != null) {
+            driver.quit();
+        }
+    }
+}

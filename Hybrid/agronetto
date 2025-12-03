@@ -1,0 +1,88 @@
+create TestRunner file
+package utils;
+
+import java.io.IOException;
+
+import org.openqa.selenium.By;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
+
+import com.aventstack.extentreports.ExtentReports;
+import com.aventstack.extentreports.ExtentTest;
+import com.aventstack.extentreports.Status;
+
+import utils.Base;
+import utils.ExcelReader;
+import utils.LoggerHandler;
+import utils.Reporter;
+import utils.Screenshot;
+import utils.WebDriverHelper;
+
+public class TestRunner extends Base{
+    WebDriverHelper helper;
+    ExtentReports reports;
+    @BeforeTest
+    public void generateReport()
+    {
+        reports = Reporter.generateExtentReport("reports");
+    }
+    @BeforeMethod
+    public void startUp()
+    {
+        openBrowser();
+        helper = new WebDriverHelper(driver);
+    }
+    @Test
+    public void test1()
+    {
+        ExtentTest test = reports.createTest("test1");
+        helper.clickOnElement(By.xpath("//div[text()='Sign In / Registration'][1]"));
+        LoggerHandler.info("click on signin");
+        test.log(Status.PASS, "click on signin");
+        helper.clickOnElement(By.xpath("(//div[@class='example-companies']//a)[1]"));
+
+        helper.switchToNewWindow();
+        LoggerHandler.info("switch window");
+
+        helper.clickOnElement(By.xpath("//a[@class='verified-dealer-title js-link-into-dialog']"));
+        helper.clickOnElement(By.xpath("//a[@class='contact-with-dealer-button']"));
+
+        Screenshot.captureScreenShot("agronetto_screenshot");
+        Reporter.attachScreenshotToReport("agronetto_screenshot", test, "Contact the seller ss");
+
+    }
+    @Test
+    public void test2()
+    {
+        ExtentTest test = reports.createTest("test2");
+        helper.clickOnElement(By.xpath("//a[text()='Blog']"));
+        LoggerHandler.info("click on Blog");
+        test.log(Status.PASS, "hover on explore");
+
+        LoggerHandler.info("hover on Blog about farm equipment");
+        helper.hoverOverElement(By.xpath("(//div[text()='Blog about farm equipment'])[1]"));
+        helper.clickOnElement(By.xpath("//div[text()='Blog about construction machinery']"));
+
+        helper.switchToNewWindow();
+        LoggerHandler.info("switch window");
+    }
+    @Test
+    public void test3() throws IOException
+    {
+        helper.clickOnElement(By.xpath("//div[@data-id='spares']"));
+        String data = ExcelReader.readdata("./data/data.xlsx", "Sheet1", 0, 0);
+        helper.sendKeys(By.xpath("//input[@class='sc-ssf-field']"),data);
+        helper.clickOnElement(By.xpath("//input[@value='Search']"));
+        helper.clickOnElement(By.xpath("//span[@class='current sl-orders-select__current']"));
+        LoggerHandler.info("click on Place on");
+        helper.clickOnElement(By.xpath("//span[text()='Least expensive on top']"));
+    }
+    @AfterMethod
+    public void tearDown()
+    {
+        reports.flush();
+        driver.quit();
+    }
+}

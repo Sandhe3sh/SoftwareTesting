@@ -1,0 +1,80 @@
+4 testcase pass
+
+
+package runner;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.Duration;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.events.EventFiringDecorator;
+import org.openqa.selenium.support.events.WebDriverListener;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import utils.EventHandler;
+
+public class TestRunner {
+	public static WebDriver driver;
+	static int PAGE_LOAD_TIME = 20;
+
+	@BeforeMethod
+	public WebDriver beforeMethod() throws MalformedURLException {
+		ChromeOptions chromeOptions = new ChromeOptions();
+		driver = new RemoteWebDriver(new URL("http://localhost:4444/"), chromeOptions);
+		driver.get("https://www.firstcry.com/");
+		driver.manage().window().maximize();
+		driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(PAGE_LOAD_TIME));
+		WebDriverListener listener = new EventHandler();
+		driver = new EventFiringDecorator<>(listener).decorate(driver);
+		return driver;
+
+	}
+@Test
+public static void test1(){
+	driver.findElement(By.id("search_box")).click();
+	driver.findElement(By.id("search_box")).sendKeys("Toys");
+	driver.findElement(By.id("search_box")).sendKeys("Clothes");
+	driver.findElement(By.xpath("//div[contains(text(),'Ethnic')]/preceding-sibling::div")).click();
+
+
+}
+@Test
+public static void test3(){
+	driver.findElement(By.id("search_box")).click();
+
+	driver.findElement(By.id("search_box")).sendKeys("Balloons");
+	 // Close Flipkart login popup
+try {
+    driver.findElement(By.cssSelector("button._2KpZ6l._2doB4z")).click();
+} catch (Exception e) {}
+
+// Click first product
+driver.findElement(By.cssSelector("a._1fQZEK, a._2UzuFa")).click();
+
+// Switch to product tab
+for (String h : driver.getWindowHandles()) {
+    driver.switchTo().window(h);
+}
+
+// Click Add to Cart
+driver.findElement(By.xpath("//button[contains(text(),'ADD TO CART')]")).click();
+
+}
+	
+	@AfterMethod
+	public void tearDown() {
+		if (driver != null) {
+			driver.quit();
+		}
+	}
+
+}

@@ -1,0 +1,66 @@
+2 test pass
+
+package runner;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.Duration;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.events.EventFiringDecorator;
+import org.openqa.selenium.support.events.WebDriverListener;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import utils.EventHandler;
+
+public class TestRunner {
+	public static WebDriver driver;
+	static int PAGE_LOAD_TIME = 20;
+
+	@BeforeMethod
+	public WebDriver beforeMethod() throws MalformedURLException {
+		ChromeOptions chromeOptions = new ChromeOptions();
+		driver = new RemoteWebDriver(new URL("http://localhost:4444/"), chromeOptions);
+		driver.get("https://www.ixigo.com");
+		driver.manage().window().maximize();
+		driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(PAGE_LOAD_TIME));
+		WebDriverListener listener = new EventHandler();
+		driver = new EventFiringDecorator<>(listener).decorate(driver);
+		return driver;
+	}
+
+	@Test
+	public void test() throws InterruptedException {
+		driver.findElement(By.xpath("//button[contains(text(),'Round Trip')]")).click();
+		Thread.sleep(1000);
+		driver.findElement(By.xpath("//input[@placeholder='From']")).click();
+		Thread.sleep(1000);
+		driver.findElement(By.xpath("//input[@placeholder='From']")).sendKeys("IDP");
+		Thread.sleep(1000);
+		driver.findElement(By.xpath("//li[contains(text(),'IDP')]")).click();
+		Thread.sleep(1000);
+		driver.findElement(By.xpath("//input[@placeholder='To']")).click();
+		Thread.sleep(1000);
+		driver.findElement(By.xpath("//input[@placeholder='To']")).sendKeys("DEL");
+		Thread.sleep(1000);
+		driver.findElement(By.xpath("//li[contains(text(),'DEL')]")).click();
+		Thread.sleep(1000);
+		driver.findElement(By.xpath("//div[contains(text(),'Travellers')]")).click();
+		Thread.sleep(1000);
+		driver.findElement(By.xpath("//label[text()='Business']")).click();
+		Thread.sleep(1000);
+		driver.findElement(By.xpath("//button[@type='submit']")).click();
+	}
+
+	@AfterMethod
+	public void tearDown() {
+		if (driver != null) {
+			driver.quit();
+		}
+	}
+}

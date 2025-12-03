@@ -1,0 +1,38 @@
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.Scanner;
+import java.io.DataInputStream;
+import java.sql.Statement;
+import java.sql.*;
+
+class Department
+{
+    public static void main (String args[]) throws Exception 
+    {
+        String url = "jdbc:mysql://localhost/ri_db";
+        String username = "test";
+        String password ="test123";
+        
+        
+      Class.forName("com.mysql.jdbc.Driver");
+      Connection con = DriverManager.getConnection(url,username,password);
+      Statement stmt=con.createStatement();
+ 
+         try
+         {
+
+            ResultSet rs=stmt.executeQuery("select lower(department_Name)from department");
+            while(rs.next())
+            {
+                System.out.print(rs.getString(1)+"\n");
+            }
+        }
+        catch(Exception e)
+        { 
+            System.out.println(e);
+            
+        }
+    }
+}

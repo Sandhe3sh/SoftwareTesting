@@ -1,0 +1,97 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+class Cart {
+	private List<Item> items;
+
+	public Cart() {
+		items = new ArrayList<>();
+	}
+
+	public void addItem(Item item) {
+		items.add(item);
+	}
+
+	public void removeItem(Item item) {
+		items.remove(item);
+	}
+
+	public double calculateTotalPrice() {
+		double totalPrice = 0.0;
+		for (Item item : items) {
+			totalPrice += item.getPrice();
+		}
+		return totalPrice;
+	}
+
+	public void clearCart() {
+		items.clear();
+	}
+
+	public List<Item> getItems() {
+		return items;
+	}
+
+	public void setItems(List<Item> items) {
+		this.items = items;
+	}
+
+}
+
+class Item {
+	private String name;
+	private double price;
+
+	public Item(String name, double price) {
+		this.name = name;
+		this.price = price;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public double getPrice() {
+		return price;
+	}
+}
+
+public class Main {
+	public static void main(String[] args) {
+		Scanner scanner = new Scanner(System.in);
+
+		Cart cart = new Cart();
+
+		int numItems = scanner.nextInt();
+		scanner.nextLine();
+
+		for (int i = 1; i <= numItems; i++) {
+			String itemName = scanner.nextLine();
+			double itemPrice = scanner.nextDouble();
+			scanner.nextLine();
+
+			Item item = new Item(itemName, itemPrice);
+			cart.addItem(item);
+		}
+
+		double totalPrice = cart.calculateTotalPrice();
+		int numItemsToRemove = scanner.nextInt();
+		scanner.nextLine();
+
+		for (int i = 1; i <= numItemsToRemove; i++) {
+			String itemNameToRemove = scanner.nextLine();
+
+			for (Item item : cart.getItems()) {
+				if (item.getName().equals(itemNameToRemove)) {
+					cart.removeItem(item);
+					break;
+				}
+			}
+		}
+
+		totalPrice = cart.calculateTotalPrice();
+		System.out.println("Total Price after removing items: $" + totalPrice);
+
+	}
+}
